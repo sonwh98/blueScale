@@ -47,7 +47,7 @@ public class BlueScaleActivity extends Activity {
             String name = device.getName();
             Log.i(TAG, "device=" + name);
             if (name.equals("Elane BT5")) {
-                Log.i(TAG, "device=" + name);
+                Log.i(TAG, "found scale " + name);
                 scale = new Scale(device);
                 scale.onDataAvailable(new DataListener() {
                     @Override
@@ -57,9 +57,7 @@ public class BlueScaleActivity extends Activity {
                         for (int i = 4, j = 0; i <= 7; i++) {
                             weight[j++] = byteArray[i];
                         }
-                        for (int j = 0; j < weight.length; j++) {
-                            Log.i(TAG, " " + weight[j]);
-                        }
+                        Log.i(TAG, "weight " + weight[weight.length-1]);
                     }
                 });
 
