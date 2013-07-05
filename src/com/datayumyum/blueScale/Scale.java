@@ -51,16 +51,9 @@ public class Scale {
         }
     }
 
-    public static byte[] convert(int[] intArray) {
-        byte[] byteArray = new byte[intArray.length];
-        for (int i = 0; i < intArray.length; i++) {
-            byteArray[i] = (byte) intArray[i];
-        }
-    }
-
-    public void sendCmd(int[] cmdBuffer) {
+    public void sendCmd(byte[] cmdBuffer) {
         try {
-            outputStream.write(convert(cmdBuffer));
+            outputStream.write(cmdBuffer);
             outputStream.flush();
         } catch (IOException ex) {
             Log.e(TAG, ex.getMessage());
@@ -85,7 +78,6 @@ class InputThread implements Runnable {
     public void run() {
         while (true) {
             try {
-                Log.i(Scale.TAG, new Date().toString());
                 int available = inputStream.available();
                 if (available > 0) {
                     byte[] buffer = new byte[available];
