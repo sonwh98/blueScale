@@ -90,10 +90,10 @@ class InputThread implements Runnable {
                 Log.e(Scale.TAG, e.getMessage());
             }
 
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-            }
+//            try {
+//                Thread.sleep(1000);
+//            } catch (InterruptedException e) {
+//            }
         }
     }
 }
