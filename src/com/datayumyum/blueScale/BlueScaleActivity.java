@@ -3,16 +3,9 @@ package com.datayumyum.blueScale;
 import android.app.Activity;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothSocket;
 import android.os.Bundle;
 import android.util.Log;
-
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.util.Set;
-import java.util.UUID;
 
 public class BlueScaleActivity extends Activity {
     static final String TAG = "BlueScale";
@@ -57,7 +50,7 @@ public class BlueScaleActivity extends Activity {
                         for (int i = 4, j = 0; i <= 7; i++) {
                             weight[j++] = byteArray[i];
                         }
-                        Log.i(TAG, "weight " + weight[weight.length-1]);
+                        Log.i(TAG, "weight " + weight[weight.length - 1]);
                     }
                 });
 
