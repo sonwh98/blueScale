@@ -2,7 +2,10 @@ package com.datayumyum.blueScale;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.util.Log;
+import android.widget.TextView;
 import com.datayumyum.device.DeviceDataListener;
 import com.datayumyum.device.ElaneScale;
 
@@ -10,19 +13,38 @@ public class BlueScaleActivity extends Activity {
     static final String TAG = "BlueScaleActivity";
 
     ElaneScale scale;
+    TextView textView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.main);
+        textView = (TextView) findViewById(R.id.weight);
 
         if (scale == null) {
             scale = new ElaneScale();
+            final Handler handler = new Handler() {
+                @Override
+                public void handleMessage(Message msg) {
+                    Bundle weightBundle = msg.getData();
+                    textView.setText("weight=" + weightBundle.getByte("weight"));
+                }
+            };
+
             scale.onDataAvailable(new DeviceDataListener() {
                 @Override
                 public void process(Object data) {
                     byte[] byteArray = (byte[]) data;
-                    Log.i(TAG, "weight " + byteArray[byteArray.length - 1]);
+                    byte weight = byteArray[byteArray.length - 1];
+                    textView.setText("weight=" + weight);
+                    Log.i(TAG, "weight " + weight);
+                    Bundle weightBundle = new Bundle();
+                    weightBundle.putByte("weight", weight);
+                    Message weightMessage = Message.obtain();
+                    weightMessage.setData(weightBundle);
+
+                    handler.sendMessage(weightMessage);
+
                 }
             });
         }

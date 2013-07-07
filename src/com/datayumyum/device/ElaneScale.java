@@ -58,19 +58,24 @@ public class ElaneScale {
 
     private BluetoothSocket tryToConnect(BluetoothDevice device) {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-        while (true) {
-            try {
-                BluetoothSocket socket = device.createRfcommSocketToServiceRecord(uuid);
-                socket.connect();
-                return socket;
-            } catch (IOException ex) {
-                Log.i(TAG, "trying to reconnect " + device.getName());
+        try {
+            BluetoothSocket socket = device.createRfcommSocketToServiceRecord(uuid);
+            while (true) {
                 try {
-                    Thread.sleep(2000);
-                } catch (InterruptedException e) {
+                    socket.connect();
+                    return socket;
+                } catch (IOException ex) {
+                    Log.i(TAG, "trying to reconnect " + device.getName());
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException e) {
+                    }
                 }
             }
+        } catch (IOException ex) {
+            Log.e(TAG, "cannot create BluetoothSocket");
         }
+        return null;
     }
 
     private BluetoothDevice findBluetoothDevice() {
