@@ -13,10 +13,5 @@
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
-        <service android:name="ScaleService"
-                 android:process="ScaleProcess"
-                 android:icon="@drawable/ic_launcher"
-                 android:label="@string/service_name">
-        </service>
     </application>
 </manifest>
