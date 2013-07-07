@@ -2,12 +2,12 @@ package com.datayumyum.blueScale;
 
 import android.app.Activity;
 import android.os.Bundle;
-import android.os.Handler;
-import android.os.Message;
 import android.util.Log;
 import android.widget.TextView;
 import com.datayumyum.device.DeviceDataListener;
 import com.datayumyum.device.ElaneScale;
+
+import static com.datayumyum.device.ElaneScale.Command.*;
 
 public class BlueScaleActivity extends Activity {
     static final String TAG = "BlueScaleActivity";
@@ -33,7 +33,6 @@ public class BlueScaleActivity extends Activity {
                             byte weight = byteArray[byteArray.length - 1];
                             textView.setText("weight=" + weight);
                             Log.i(TAG, "weight " + weight);
-                            textView.setText("weight=" + weight);
                         }
                     });
 
@@ -41,9 +40,6 @@ public class BlueScaleActivity extends Activity {
             });
         }
 
-        byte[] tare = {0x07, 0x00, 0x72};
-        byte[] readContinuous = {0x07, 0x00, 0x01};
-        byte[] autoOffTimer = {0x07, 0x00, 0x7E, 0x00, 0x00, 0x00, 0x00, 127};
-        scale.sendCmd(readContinuous);
+        scale.sendCmd(READ_CONTINUOUS);
     }
 }

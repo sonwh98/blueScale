@@ -8,10 +8,7 @@ import android.util.Log;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 
 /**
  * User: son.c.to@gmail.com
@@ -21,14 +18,18 @@ import java.util.UUID;
 public class ElaneScale {
     OutputStream outputStream;
     InputStream inputStream;
-    InputReader inputReader;
+
+    InputThread inputThread;
 
     static final String TAG = "device.Scale";
     final BluetoothAdapter bluetoothAdapter;
+    private BluetoothSocket socket;
+    private final BluetoothDevice device;
 
     public ElaneScale() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        initialize();
+        device = findBluetoothDevice();
+        tryToConnect();
     }
 
     public void sendCmd(byte[] cmdBuffer) {
@@ -41,45 +42,53 @@ public class ElaneScale {
     }
 
     public void onDataAvailable(DeviceDataListener listener) {
-        inputReader.deviceDataListeners.add(listener);
+        inputThread.deviceDataListeners.add(listener);
     }
 
-    private void initialize() {
-        try {
-            BluetoothDevice device = findBluetoothDevice();
-            BluetoothSocket socket = tryToConnect(device);
-            outputStream = socket.getOutputStream();
-            inputStream = socket.getInputStream();
-            inputReader = new InputReader();
-            inputReader.start();
-        } catch (IOException ex2) {
-            Log.e(TAG, ex2.getMessage());
-        }
-    }
-
-    private BluetoothSocket tryToConnect(BluetoothDevice device) {
+    private void tryToConnect() {
         UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
-        try {
-            BluetoothSocket socket = device.createRfcommSocketToServiceRecord(uuid);
-            while (true) {
+        while (true) {
+            try {
+                socket = device.createRfcommSocketToServiceRecord(uuid);
+                if (bluetoothAdapter.isDiscovering()) {
+                    bluetoothAdapter.cancelDiscovery();
+                }
+                socket.connect();
+                outputStream = socket.getOutputStream();
+                inputStream = socket.getInputStream();
+                if (inputThread == null) {
+                    inputThread = new InputThread();
+                    inputThread.start();
+                }
+                break;
+            } catch (IOException ex) {
+                Log.i(TAG, "trying to reconnect " + device.getName());
+                closeResources();
+
                 try {
-                    if (bluetoothAdapter.isDiscovering()) {
-                        bluetoothAdapter.cancelDiscovery();
-                    }
-                    socket.connect();
-                    return socket;
-                } catch (IOException ex) {
-                    Log.i(TAG, "trying to reconnect " + device.getName());
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException e) {
-                    }
+                    Thread.sleep(2000);
+                } catch (InterruptedException e) {
                 }
             }
-        } catch (IOException ex) {
-            Log.e(TAG, "cannot create BluetoothSocket");
         }
-        return null;
+    }
+
+    private void closeResources() {
+        try {
+            if (outputStream != null) {
+                outputStream.close();
+            }
+
+            if (inputStream != null) {
+                inputStream.close();
+            }
+
+            if (socket != null) {
+                socket.close();
+            }
+        } catch (IOException ex) {
+            Log.w(TAG, ex.getMessage());
+        }
     }
 
     private BluetoothDevice findBluetoothDevice() {
@@ -96,30 +105,49 @@ public class ElaneScale {
         return null;
     }
 
-    private class InputReader extends Thread {
+    private class InputThread extends Thread {
         List<DeviceDataListener> deviceDataListeners;
+        boolean stop;
+        byte[] lastInput;
 
-        public InputReader() {
+        public InputThread() {
             deviceDataListeners = new LinkedList<DeviceDataListener>();
         }
 
         @Override
         public void run() {
-            while (true) {
+            while (!stop) {
                 try {
-                    int available = inputStream.available();
-                    if (available > 0) {
-                        byte[] buffer = new byte[available];
-                        inputStream.read(buffer);
-                        for (DeviceDataListener listener : deviceDataListeners) {
-                            listener.process(buffer);
-                        }
+                    byte[] buffer = new byte[8];
+                    int bytesRead = inputStream.read(buffer);
+                    if (!Arrays.equals(buffer, lastInput) && bytesRead > 0) {
+                        lastInput = buffer;
+                        notifyDeviceDateListeners(buffer);
                     }
                 } catch (IOException e) {
                     Log.e(ElaneScale.TAG, e.getMessage());
+
+                    try {
+                        Thread.sleep(2000);
+                    } catch (InterruptedException ex) {
+                    }
+
+                    tryToConnect();
                 }
             }
         }
+
+        private void notifyDeviceDateListeners(byte[] data) {
+            for (DeviceDataListener listener : deviceDataListeners) {
+                listener.process(data);
+            }
+        }
+    }
+
+    public static class Command {
+        public static final byte[] TARE = {0x07, 0x00, 0x72};
+        public static final byte[] AUTO_OFF_TIMER = {0x07, 0x00, 0x7E, 0x00, 0x00, 0x00, 0x00, 127};
+        public static final byte[] READ_CONTINUOUS = {0x07, 0x00, 0x01};
     }
 }
 
