@@ -16,7 +16,7 @@ public class ScaleService extends Service {
 
     @Override
     public IBinder onBind(Intent intent) {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return null;
     }
 
     @Override
