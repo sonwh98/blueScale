@@ -20,13 +20,14 @@ import java.util.UUID;
  */
 public class ElaneScale {
     OutputStream outputStream;
-    private InputStream inputStream;
-
+    InputStream inputStream;
     InputReader inputReader;
 
     static final String TAG = "device.Scale";
+    final BluetoothAdapter bluetoothAdapter;
 
     public ElaneScale() {
+        bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
         initialize();
     }
 
@@ -62,6 +63,9 @@ public class ElaneScale {
             BluetoothSocket socket = device.createRfcommSocketToServiceRecord(uuid);
             while (true) {
                 try {
+                    if (bluetoothAdapter.isDiscovering()) {
+                        bluetoothAdapter.cancelDiscovery();
+                    }
                     socket.connect();
                     return socket;
                 } catch (IOException ex) {
@@ -79,7 +83,7 @@ public class ElaneScale {
     }
 
     private BluetoothDevice findBluetoothDevice() {
-        BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : pairedDevices) {
             String name = device.getName();

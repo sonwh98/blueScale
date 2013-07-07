@@ -23,27 +23,19 @@ public class BlueScaleActivity extends Activity {
 
         if (scale == null) {
             scale = new ElaneScale();
-            final Handler handler = new Handler() {
-                @Override
-                public void handleMessage(Message msg) {
-                    Bundle weightBundle = msg.getData();
-                    textView.setText("weight=" + weightBundle.getByte("weight"));
-                }
-            };
-
             scale.onDataAvailable(new DeviceDataListener() {
                 @Override
-                public void process(Object data) {
-                    byte[] byteArray = (byte[]) data;
-                    byte weight = byteArray[byteArray.length - 1];
-                    textView.setText("weight=" + weight);
-                    Log.i(TAG, "weight " + weight);
-                    Bundle weightBundle = new Bundle();
-                    weightBundle.putByte("weight", weight);
-                    Message weightMessage = Message.obtain();
-                    weightMessage.setData(weightBundle);
-
-                    handler.sendMessage(weightMessage);
+                public void process(final Object data) {
+                    runOnUiThread(new Runnable() {
+                        @Override
+                        public void run() {
+                            byte[] byteArray = (byte[]) data;
+                            byte weight = byteArray[byteArray.length - 1];
+                            textView.setText("weight=" + weight);
+                            Log.i(TAG, "weight " + weight);
+                            textView.setText("weight=" + weight);
+                        }
+                    });
 
                 }
             });
