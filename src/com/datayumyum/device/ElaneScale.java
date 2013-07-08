@@ -126,12 +126,6 @@ public class ElaneScale {
                     }
                 } catch (IOException e) {
                     Log.e(ElaneScale.TAG, e.getMessage());
-
-                    try {
-                        Thread.sleep(2000);
-                    } catch (InterruptedException ex) {
-                    }
-
                     tryToConnect();
                 }
             }
