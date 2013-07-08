@@ -122,7 +122,7 @@ public class ElaneScale {
                     int bytesRead = inputStream.read(buffer);
                     if (!Arrays.equals(buffer, lastInput) && bytesRead > 0) {
                         lastInput = buffer;
-                        notifyDeviceDateListeners(buffer);
+                        notifyDeviceDataListeners(buffer);
                     }
                 } catch (IOException e) {
                     Log.e(ElaneScale.TAG, e.getMessage());
@@ -137,7 +137,7 @@ public class ElaneScale {
             }
         }
 
-        private void notifyDeviceDateListeners(byte[] data) {
+        private void notifyDeviceDataListeners(byte[] data) {
             for (DeviceDataListener listener : deviceDataListeners) {
                 listener.process(data);
             }
