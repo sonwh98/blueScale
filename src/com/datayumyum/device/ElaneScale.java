@@ -18,13 +18,13 @@ import java.util.*;
 public class ElaneScale {
     OutputStream outputStream;
     InputStream inputStream;
-
     InputThread inputThread;
 
-    static final String TAG = "device.Scale";
+    BluetoothSocket socket;
     final BluetoothAdapter bluetoothAdapter;
-    private BluetoothSocket socket;
-    private final BluetoothDevice device;
+    final BluetoothDevice device;
+
+    static final String TAG = "device.Scale";
 
     public ElaneScale() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
