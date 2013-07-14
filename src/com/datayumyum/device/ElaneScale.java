@@ -22,13 +22,16 @@ public class ElaneScale {
 
     BluetoothSocket socket;
     final BluetoothAdapter bluetoothAdapter;
-    final BluetoothDevice device;
+    BluetoothDevice device;
 
     static final String TAG = "device.Scale";
+    static final UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
 
     public ElaneScale() {
         bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-        device = findBluetoothDevice();
+        if (!bluetoothAdapter.isEnabled()) {
+            bluetoothAdapter.enable();
+        }
         tryToConnect();
     }
 
@@ -46,9 +49,13 @@ public class ElaneScale {
     }
 
     private void tryToConnect() {
-        UUID uuid = UUID.fromString("00001101-0000-1000-8000-00805F9B34FB");
+
         while (true) {
             try {
+                if (device == null) {
+                    device = findBluetoothDevice();
+                }
+
                 socket = device.createRfcommSocketToServiceRecord(uuid);
                 if (bluetoothAdapter.isDiscovering()) {
                     bluetoothAdapter.cancelDiscovery();
@@ -92,7 +99,6 @@ public class ElaneScale {
     }
 
     private BluetoothDevice findBluetoothDevice() {
-
         Set<BluetoothDevice> pairedDevices = bluetoothAdapter.getBondedDevices();
         for (BluetoothDevice device : pairedDevices) {
             String name = device.getName();
